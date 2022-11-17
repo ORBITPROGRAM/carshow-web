@@ -28,14 +28,14 @@ function AddCar(props) {
     setOpen(false);
   };
 
+  const handleChange = (event) => {
+    setCar({ ...car, [event.target.name]: event.target.value });
+  };
+
   // Save car and close modal form
   const handleSave = () => {
     props.addCar(car);
     handleClose();
-  };
-
-  const handleChange = (event) => {
-    setCar({ ...car, [event.target.name]: event.target.value });
   };
 
   return (

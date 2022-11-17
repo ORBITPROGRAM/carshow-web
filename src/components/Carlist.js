@@ -7,11 +7,12 @@ import {
   gridClasses,
 } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";
-import AddCar from "./AddCar.js";
-import EditCar from "./EditCar.js";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+
+import AddCar from "./AddCar.js";
+import EditCar from "./EditCar.js";
 
 function CustomToolbar() {
   return (
@@ -30,7 +31,13 @@ function Carlist() {
   }, []);
 
   const fetchCars = () => {
-    fetch(SERVER_URL + "api/cars")
+    // Read the token from the session storage
+    // and include it to Authorization header
+    const token = sessionStorage.getItem("jwt");
+
+    fetch(SERVER_URL + "api/cars", {
+      headers: { Authorization: token },
+    })
       .then((response) => response.json())
       .then((data) => setCars(data._embedded.cars))
       .catch((err) => console.error(err));
@@ -38,13 +45,18 @@ function Carlist() {
 
   const onDelClick = (url) => {
     if (window.confirm("Are you sure to delete?")) {
-      fetch(url, { method: "DELETE" })
+      const token = sessionStorage.getItem("jwt");
+
+      fetch(url, {
+        method: "DELETE",
+        headers: { Authorization: token },
+      })
         .then((response) => {
           if (response.ok) {
             fetchCars();
             setOpen(true);
           } else {
-            alert("Something went wrong!");
+            alert("Something went wrsong!");
           }
         })
         .catch((err) => console.error(err));
@@ -53,10 +65,13 @@ function Carlist() {
 
   // Add a new car
   const addCar = (car) => {
+    const token = sessionStorage.getItem("jwt");
+
     fetch(SERVER_URL + "api/cars", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
       body: JSON.stringify(car),
     })
@@ -70,12 +85,15 @@ function Carlist() {
       .catch((err) => console.error(err));
   };
 
-  // Update existing car
+  // Update car
   const updateCar = (car, link) => {
+    const token = sessionStorage.getItem("jwt");
+
     fetch(link, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
       body: JSON.stringify(car),
     })
@@ -125,8 +143,8 @@ function Carlist() {
           rows={cars}
           columns={columns}
           disableSelectionOnClick={true}
-          getRowId={(row) => row._links.self.href}
           components={{ Toolbar: CustomToolbar }}
+          getRowId={(row) => row._links.self.href}
         />
         <Snackbar
           open={open}
